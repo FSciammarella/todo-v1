@@ -3,6 +3,15 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
+const mongoose = require("mongoose");
+mongoose.connect(process.env.DB_URL, {useNewUrlParser: true, useUnifiedTopology: true});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log("Connected to mongo atlas");
+  db.close();
+});
+
 const app = express();
 app.use(express.static("public"));
 app.set("view engine", "ejs");
