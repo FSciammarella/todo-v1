@@ -93,10 +93,14 @@ app.get("/", (req, res) => {
 
 app.get("/:listName", (req, res) => {
     let query = req.params.listName;
-    List.find({
+    if (query == "favicon.ico"){
+        res.sendStatus(404);
+    };
+
+    List.findOne({
         name: query
     }, (err, result) => {
-        if (!result[0]) {
+        if (!result) {
             let newList = new List({
                 name: req.params.listName,
                 tasks: []
@@ -106,7 +110,7 @@ app.get("/:listName", (req, res) => {
             });
         } else {
             res.render("todo", {
-                list: result[0]
+                list: result
             })
         }
 
@@ -115,19 +119,6 @@ app.get("/:listName", (req, res) => {
 });
 
 app.post("/:listName", (req, res) => {
-    // List.update({
-    //     "tasks._id": req.body.id[0]
-    // },{
-    //     "$pull":{
-    //         "tasks":{
-    //             "_id":req.body.id[0]
-    //         }
-    //     }
-    // }, function(err, result){
-    //     console.error(err);
-    //     console.log(result);
-    // })
-
     List.findOne({
         name: req.params.listName
     }, (err, result) => {
@@ -155,6 +146,23 @@ app.post("/:listName", (req, res) => {
         });
     })
 });
+
+
+app.post("/:listName/clear",(req,res)=>{
+    List.update({
+        "tasks.done": true
+    },{
+        "$pull":{
+            "tasks":{
+                "done":true
+            }
+        }
+    }, function(err, result){
+        console.error(err);
+        console.log(result);
+    })
+    res.redirect("/"+req.params.listName)
+})
 
 
 app.listen(process.env.PORT || 3000, () => {

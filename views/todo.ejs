@@ -12,27 +12,22 @@
 <body>
     <div class="box">
         <form action="/<%= list.name %>" method="post">
-        <div id="heading">
-            <h1><%= list.name %></h1>
-        </div>
-        <% for(let task of list.tasks) {%>
-        <div class="item">
-            <input type="checkbox" <% if (task.done){ %> checked <% } %> name="id[]" value="<%= task._id.toString() %>">
-            <p><%= task.description %></p>
-        </div>
-        <%}  %>
+            <div id="heading">
+                <h1><%= list.name %></h1>
+            </div>
+            <% for(let task of list.tasks) {%>
+            <div class="item">
+                <input onchange="this.form.submit()" type="checkbox" <% if (task.done){ %> checked <% } %> name="id[]"
+                    value="<%= task._id.toString() %>">
+                <p><%= task.description %></p>
+            </div>
+            <%}  %>
             <input type="hidden" name="listName" value=<%= list.name %>>
 
             <div class="box">
                 <input type="text" name="newTask" id="newTask" autocomplete="false" placeholder="New Task">
                 <button type="submit">+</button>
             </div>
-            <!-- <div class="box">
-            <div class="item">
-                <input type="checkbox" class="clear" name="clear">
-                <p>Clear List</p>
-            </div>
-        </div> -->
         </form>
     </div>
 
