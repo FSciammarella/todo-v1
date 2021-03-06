@@ -1,47 +1,162 @@
 require("dotenv").config();
+const _ = require("lodash");
+const dayjs = require("dayjs");
 
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const mongoose = require("mongoose");
-mongoose.connect(process.env.DB_URL, {useNewUrlParser: true, useUnifiedTopology: true});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log("Connected to mongo atlas");
-  db.close();
+const {
+    result
+} = require("lodash");
+const {
+    query
+} = require("express");
+mongoose.connect(process.env.DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 });
+const db = mongoose.connection;
+
+const tasksSchema = new mongoose.Schema({
+    description: {
+        required: true,
+        type: String,
+        minLength: 1
+    },
+    done: Boolean
+});
+const listsSchema = new mongoose.Schema({
+    tasks: [tasksSchema],
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    name: {
+        required: true,
+        type: String,
+        minLength: 1
+    },
+});
+
+const List = new mongoose.model("List", listsSchema);
+// const Task = new mongoose.model("Task", tasksSchema);
+
 
 const app = express();
 app.use(express.static("public"));
 app.set("view engine", "ejs");
-app.set('view options',{delimiter:"%"});
-app.use(bodyParser.urlencoded({extended:true}));
-var tasks = [];
+app.set('view options', {
+    delimiter: "%"
+});
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
-app.get("/", (req,res)=>{
-    let today = new Date();
-    var options={
-        weekday:"long",
-        day:"numeric",
-        month:"long"
-    }
-    res.render("todo",{
-        day: today.toLocaleDateString("pt-BR",options),
-        tasks: tasks
+
+// const task = [
+//     new Task({
+//         description:"Do nothing",
+//         done:false
+//     }),
+//     new Task({
+//         description:"Buy Food",
+//         done:false
+//     }),
+//     new Task({
+//         description:"Sleep",
+//         done:true
+//     })
+// ]
+
+// const tasklist = new List({
+//     name:dayjs().format("DD-MM-YYYY"),
+//     tasks:[]
+// });
+
+// tasklist.tasks.push(...task);
+
+// tasklist.save();
+
+
+app.get("/", (req, res) => {
+    let query = dayjs().format("DD-MM-YYYY");
+    List.find({
+        name: query
+    }, (err, result) => {
+        res.render("todo", {
+            list: result[0]
+        })
     });
+
 });
 
-app.post("/",(req,res)=>{
+app.get("/:listName", (req, res) => {
+    let query = req.params.listName;
+    List.find({
+        name: query
+    }, (err, result) => {
+        if (!result[0]) {
+            let newList = new List({
+                name: req.params.listName,
+                tasks: []
+            })
+            newList.save().then(() => {
+                res.redirect("/" + req.params.listName);
+            });
+        } else {
+            res.render("todo", {
+                list: result[0]
+            })
+        }
 
-    if(req.body.clear){
-        tasks=[];
-    }else{
-        tasks.push(req.body.newTask);
-    }
-   res.redirect("/");
+    });
+
 });
 
-app.listen(process.env.PORT || 3000,()=>{
+app.post("/:listName", (req, res) => {
+    // List.update({
+    //     "tasks._id": req.body.id[0]
+    // },{
+    //     "$pull":{
+    //         "tasks":{
+    //             "_id":req.body.id[0]
+    //         }
+    //     }
+    // }, function(err, result){
+    //     console.error(err);
+    //     console.log(result);
+    // })
+
+    List.findOne({
+        name: req.params.listName
+    }, (err, result) => {
+        console.log(req.body.id);
+        req.body.id = req.body.id || [];
+        for (task of result.tasks){
+            console.log(task._id);
+            if (req.body.id.includes(task._id.toString())){
+                console.log("worked");
+                task.done = true;
+            }else{
+                task.done = false;
+            }
+        }
+        if (req.body.newTask) {
+            task = {
+                description: req.body.newTask,
+                done: false
+            };
+            result.tasks.push(task);
+
+        };
+        result.save().then(() => {
+            res.redirect("/" + req.params.listName)
+        });
+    })
+});
+
+
+app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on http://localhost:${process.env.PORT || 3000}`);
 });
