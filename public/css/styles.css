@@ -113,3 +113,6 @@ button.delete{
 button.delete:hover{
   opacity: 1;
 }
+.submit.hidden{
+  display:none
+}
