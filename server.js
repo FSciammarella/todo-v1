@@ -119,13 +119,18 @@ app.get("/:listName", (req, res) => {
 });
 
 app.post("/:listName", (req, res) => {
+    console.log(req.body);
     List.findOne({
         name: req.params.listName
     }, (err, result) => {
         if(req.body.delete){
-            result.tasks.id(req.body.delete).remove();
-            result.save();
-            res.redirect("/"+req.params.listName);
+            let to_delete = result.tasks.id(req.body.delete);
+            if (to_delete){
+                to_delete.remove();
+            }
+            result.save().then(()=>{
+                res.redirect("/"+req.params.listName);
+            });
             return;
         }
 
@@ -166,8 +171,11 @@ app.post("/:listName/clear",(req,res)=>{
     }, function(err, result){
         console.error(err);
         console.log(result);
-    })
-    res.redirect("/"+req.params.listName)
+    }).then(
+    ()=>{
+        res.redirect("/"+req.params.listName)
+    }        
+    )
 })
 
 
