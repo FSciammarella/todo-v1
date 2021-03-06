@@ -122,7 +122,13 @@ app.post("/:listName", (req, res) => {
     List.findOne({
         name: req.params.listName
     }, (err, result) => {
-        console.log(req.body.id);
+        if(req.body.delete){
+            result.tasks.id(req.body.delete).remove();
+            result.save();
+            res.redirect("/"+req.params.listName);
+            return;
+        }
+
         req.body.id = req.body.id || [];
         for (task of result.tasks){
             console.log(task._id);

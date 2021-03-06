@@ -98,3 +98,18 @@ footer {
   color: rgba(0, 0, 0, 0.5);
   text-align: center;
 }
+
+button.delete{
+  margin-left: auto;
+  background: none!important;
+  border: none;
+  padding: 0!important;
+  font-family: 'helvetica neue', sans-serif;
+  color: grey;
+  opacity: 0.6;
+  text-decoration: none;
+  cursor: pointer;
+}
+button.delete:hover{
+  opacity: 1;
+}

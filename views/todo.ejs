@@ -18,8 +18,9 @@
             <% for(let task of list.tasks) {%>
             <div class="item">
                 <input onchange="this.form.submit()" type="checkbox" <% if (task.done){ %> checked <% } %> name="id[]"
-                    value="<%= task._id.toString() %>">
+                value="<%= task._id.toString() %>">
                 <p><%= task.description %></p>
+                <button class="delete" type="submit" name="delete" value="<%= task._id.toString() %>">-</button>
             </div>
             <%}  %>
             <input type="hidden" name="listName" value=<%= list.name %>>
