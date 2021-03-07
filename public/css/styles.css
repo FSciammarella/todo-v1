@@ -56,7 +56,7 @@ form {
   margin-left: 0;
 }
 
-button {
+button.add {
   min-height: 50px;
   width: 50px;
   border-radius: 50%;
@@ -109,10 +109,34 @@ button.delete{
   opacity: 0.6;
   text-decoration: none;
   cursor: pointer;
+  min-height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border-color: transparent;
+  font-size: 3rem;
+  font-weight: lighter;
 }
 button.delete:hover{
   opacity: 1;
 }
 .submit.hidden{
   display:none
+}
+.clearfix{
+  display: none;
+}
+
+@media (max-width:390px){
+  button.delete{
+    margin-right: 3%;
+  }
+  button.add{
+    display: block;
+    margin:auto;
+    margin-bottom: .1rem;
+  }
+  .clearfix{
+    clear: both;
+    display: block;
+  }
 }
