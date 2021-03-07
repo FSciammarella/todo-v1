@@ -36,7 +36,8 @@ const mongoose = require("mongoose");
 
 mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex:true
 });
 
 const db = mongoose.connection;
@@ -56,18 +57,18 @@ const tasksSchema = new mongoose.Schema({
 
 const listsSchema = new mongoose.Schema({
     tasks: [tasksSchema],
-    date: {
-        type: Date,
-        default: Date.now
-    },
     name: {
         required: true,
         type: String,
         minLength: 1
     },
+}, {
+    timestamps: true
 });
+listsSchema.index({"updatedAt":1},{expireAfterSeconds:7*24*60*60});
 
 const List = new mongoose.model("List", listsSchema);
+
 
 /*
  * Function declarations
@@ -109,32 +110,14 @@ function updateDoneTasks(taskList, _ids) {
 app.get("/", (req, res) => {
 
     let query = dayjs().format("DD-MM-YYYY");
-    List.findOne({
-        name: query
-    }, (err, result) => {
-        if (!result) {
-            result = new List({
-                name: query
-            });
-        }
-        result.save().then(
-            () => {
-                res.render("todo", {
-                    list: result
-                })
-            }
-
-        ).catch((err) => {
-            console.error(err)
-        });
-    });
-
+    res.redirect("/" + query);
 });
+
 
 app.get("/:listName", (req, res) => {
     let query = req.params.listName;
     if (query == "favicon.ico") {
-        res.sendStatus(404);
+        return;
     };
 
     List.findOne({
@@ -207,7 +190,9 @@ app.post("/:listName/clear", (req, res) => {
         }
     }).then(() => {
         res.redirect("/" + req.params.listName)
-    }).catch((err)=>{console.error(err)});
+    }).catch((err) => {
+        console.error(err)
+    });
 })
 
 
